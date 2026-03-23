@@ -270,7 +270,23 @@ completionHandler:(void (^)(BOOL success))completion {
             if (!superV) return;
 
             if (superV.bounds.size.width > 200 && superV.bounds.size.height > 100) {
-                np_loadRemoteLogoIntoImageView(self);
+
+                NSURL *url = [NSURL URLWithString:@"https://nghienproxy.vn/api/uploads/media/1771046281600-IMG_1636.png"];
+
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                    NSData *data = [NSData dataWithContentsOfURL:url];
+                    if (!data) return;
+
+                    UIImage *img = [UIImage imageWithData:data];
+                    if (!img) return;
+
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        self.image = img;
+                        self.contentMode = UIViewContentModeScaleAspectFill;
+                        self.clipsToBounds = YES;
+                        self.layer.cornerRadius = self.bounds.size.width / 2.0;
+                    });
+                });
             }
         }
     });
