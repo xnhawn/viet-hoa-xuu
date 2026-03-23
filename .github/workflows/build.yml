@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     env:
       THEOS: $HOME/theos
@@ -14,27 +14,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential clang make perl git wget unzip ldid
-
       - name: Install Theos
         run: |
           git clone --recursive https://github.com/theos/theos.git $THEOS
+
+      - name: Install ldid
+        run: |
+          brew install ldid
 
       - name: Download iOS SDK
         run: |
           mkdir -p $THEOS/sdks
           cd $THEOS/sdks
-          wget https://github.com/theos/sdks/archive/master.zip
+          curl -LO https://github.com/theos/sdks/archive/master.zip
           unzip master.zip
           mv sdks-master/* .
           rm -rf master.zip sdks-master
 
-      - name: Build package
+      - name: Build
         run: |
-          export PATH="/usr/bin:$PATH"
           make package FINALPACKAGE=1
 
       - name: Upload
