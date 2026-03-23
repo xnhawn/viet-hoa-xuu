@@ -1,35 +1,39 @@
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
 
-static NSString *const kNPLogoURL = @"https://nghienproxy.vn/api/uploads/media/1771046281600-IMG_1636.png";
-static UIImage *gNPCachedLogo = nil;
-
 static NSDictionary *vietMap() {
     return @{
+        // HEADER
         @"插件版本 V6.4": @"Phiên bản 3.7.5",
         @"插件版本V6.4": @"Phiên bản 3.7.5",
-
-        @"XUU²": @"",
-        @"XUUz": @"",
-
         @"本插件完全免费分享！": @"Phát hành by Hà Thiện Nhân!",
         @"如因本插件产生的任何！": @"Tool Ngâm Facebook!",
         @"利益纠纷将由使用者自行承担！": @"Copyright © 2026 Nghiện Proxy",
-
         @"虚拟工具箱": @"Tool Nghiện Proxy",
+
+        // TÊN / FOOTER
+        @"XUUz": @"Nghiện Proxy",
+        @"XUU²": @"Nghiện Proxy",
+        @"By•XUUZ": @"By • Nghiện Proxy",
+        @"By•XUU²": @"By • Nghiện Proxy",
+
+        // MENU
         @"退出": @"Thoát",
         @"关闭": @"Đóng",
 
+        // DANH MỤC
         @"相机功能": @"Camera",
         @"伪装功能": @"Giả lập",
         @"屏蔽功能": @"Chặn",
         @"特色功能": @"VIP",
 
+        // CAMERA
         @"选择替换": @"Chọn thay thế",
         @"未选择": @"Chưa chọn",
         @"禁用替换": @"Tắt thay thế",
         @"未替换": @"Chưa thay",
 
+        // GIẢ LẬP
         @"编辑映射": @"Chỉnh sửa ánh xạ",
         @"未映射": @"Chưa ánh xạ",
         @"虚拟定位": @"Giả lập vị trí",
@@ -44,17 +48,20 @@ static NSDictionary *vietMap() {
         @"生物验证": @"Xác thực sinh học",
         @"伪装计算器": @"Giả máy tính",
 
+        // CHẶN
         @"屏蔽代理检测": @"Chặn phát hiện proxy",
         @"屏蔽截屏检测": @"Chặn phát hiện chụp màn",
         @"屏蔽截录屏检测": @"Chặn phát hiện quay/chụp màn",
         @"屏蔽应用摇一摇": @"Chặn lắc thiết bị",
 
+        // VIP
         @"点击按钮": @"Tự động nhấn",
         @"触摸轨迹": @"Ghi thao tác chạm",
         @"左滑返回": @"Vuốt trái để quay lại",
         @"深色键盘": @"Bàn phím tối",
         @"最高FPS": @"FPS tối đa",
 
+        // TOOL
         @"常驻后台": @"Chạy nền",
         @"清理缓存": @"Dọn cache",
         @"自动点击": @"Tự động click",
@@ -68,16 +75,19 @@ static NSDictionary *vietMap() {
         @"FLEX调试": @"Debug FLEX",
         @"ClassDump": @"ClassDump",
 
+        // LIÊN HỆ
         @"联系方式": @"Liên hệ",
         @"官方网站": @"Trang web",
         @"TG交流群": @"Nhóm Telegram",
 
+        // FORM
         @"保存": @"Lưu",
         @"清空映射": @"Xoá ánh xạ",
         @"修改文字": @"Sửa văn bản",
         @"重定向URL": @"Chuyển hướng URL",
         @"修改URL请求头值": @"Sửa header URL",
 
+        // VỊ TRÍ
         @"搜索地址或地点": @"Tìm địa điểm",
         @"历史记录": @"Lịch sử",
         @"输入位置": @"Nhập vị trí",
@@ -86,20 +96,20 @@ static NSDictionary *vietMap() {
         @"海拔": @"Độ cao",
         @"确认位置": @"Xác nhận vị trí",
 
+        // WIFI
         @"输入 Wi-Fi SSID (网络名称)": @"Nhập tên WiFi",
         @"输入 Wi-Fi BSSID (网络Mac地址)": @"Nhập MAC WiFi",
         @"清除设置": @"Xoá cài đặt",
         @"当前未设置 Wi-Fi": @"Chưa cấu hình WiFi",
 
+        // VERSION
         @"伪装版本设置": @"Cài đặt giả lập",
         @"当前伪装版本": @"Phiên bản hiện tại",
         @"应用版本": @"Phiên bản app",
         @"系统版本": @"Phiên bản hệ thống",
         @"设备型号": @"Thiết bị",
         @"保存配置": @"Lưu cấu hình",
-        @"清除配置": @"Xoá cấu hình",
-
-        @"By•XUUZ": @"By • Nghiện Proxy"
+        @"清除配置": @"Xoá cấu hình"
     };
 }
 
@@ -107,12 +117,14 @@ static NSString *replaceAllText(NSString *text) {
     if (!text || text.length == 0) return text;
 
     NSString *result = [text copy];
+
     for (NSString *key in vietMap()) {
         NSString *value = [vietMap() objectForKey:key];
         if ([result containsString:key]) {
             result = [result stringByReplacingOccurrencesOfString:key withString:value];
         }
     }
+
     return result;
 }
 
@@ -126,66 +138,22 @@ static NSAttributedString *replaceAllAttrText(NSAttributedString *attrText) {
         return attrText;
     }
 
-    NSMutableAttributedString *mutableAttr =
+    NSMutableAttributedString *mutableText =
         [[NSMutableAttributedString alloc] initWithAttributedString:attrText];
-    [mutableAttr replaceCharactersInRange:NSMakeRange(0, mutableAttr.length)
+
+    [mutableText replaceCharactersInRange:NSMakeRange(0, mutableText.length)
                                withString:translated];
-    return mutableAttr;
-}
 
-static void np_loadRemoteLogoIntoImageView(UIImageView *imageView) {
-    if (gNPCachedLogo) {
-        imageView.image = gNPCachedLogo;
-        imageView.contentMode = UIViewContentModeScaleAspectFill;
-        imageView.clipsToBounds = YES;
-        imageView.layer.cornerRadius = imageView.bounds.size.width / 2.0;
-        return;
-    }
-
-    NSURL *url = [NSURL URLWithString:kNPLogoURL];
-    if (!url) return;
-
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSData *data = [NSData dataWithContentsOfURL:url];
-        if (!data) return;
-
-        UIImage *img = [UIImage imageWithData:data];
-        if (!img) return;
-
-        gNPCachedLogo = img;
-
-        dispatch_async(dispatch_get_main_queue(), ^{
-            imageView.image = img;
-            imageView.contentMode = UIViewContentModeScaleAspectFill;
-            imageView.clipsToBounds = YES;
-            imageView.layer.cornerRadius = imageView.bounds.size.width / 2.0;
-        });
-    });
+    return mutableText;
 }
 
 %hook UILabel
 
 - (void)setText:(NSString *)text {
-    NSString *translated = replaceAllText(text);
-
-    if ([text isEqualToString:@"XUUz"] || [text isEqualToString:@"XUU²"]) {
-        self.hidden = YES;
-        %orig(@"");
-        return;
-    }
-
-    %orig(translated);
+    %orig(replaceAllText(text));
 }
 
 - (void)setAttributedText:(NSAttributedString *)attrText {
-    NSString *raw = attrText.string ?: @"";
-    if ([raw isEqualToString:@"XUUz"] || [raw isEqualToString:@"XUU²"]) {
-        self.hidden = YES;
-        NSAttributedString *empty = [[NSAttributedString alloc] initWithString:@""];
-        %orig(empty);
-        return;
-    }
-
     %orig(replaceAllAttrText(attrText));
 }
 
@@ -223,6 +191,7 @@ static void np_loadRemoteLogoIntoImageView(UIImageView *imageView) {
 
 %end
 
+// cập nhật link
 %hook UIApplication
 
 - (void)openURL:(NSURL *)url
@@ -233,12 +202,12 @@ completionHandler:(void (^)(BOOL success))completion {
 
     if ([abs containsString:@"t.me"] || [abs containsString:@"telegram.me"]) {
         url = [NSURL URLWithString:@"https://t.me/xnhawn"];
-    } else if ([abs containsString:@"http"]) {
-        if ([abs containsString:@"xuu"] ||
-            [abs containsString:@"official"] ||
-            [abs containsString:@"copyright"]) {
-            url = [NSURL URLWithString:@"https://nghienproxy.vn"];
-        }
+    } else if ([abs containsString:@"facebook.com"] ||
+               [abs containsString:@"fb.com"] ||
+               [abs containsString:@"copyright"] ||
+               [abs containsString:@"official"] ||
+               [abs containsString:@"xuu"]) {
+        url = [NSURL URLWithString:@"https://nghienproxy.vn"];
     }
 
     %orig(url, options, completion);
@@ -246,6 +215,7 @@ completionHandler:(void (^)(BOOL success))completion {
 
 %end
 
+// ẩn logo trong header
 %hook UIImageView
 
 - (void)setImage:(UIImage *)image {
@@ -259,7 +229,8 @@ completionHandler:(void (^)(BOOL success))completion {
             if (!superV) return;
 
             if (superV.bounds.size.width > 200 && superV.bounds.size.height > 100) {
-                np_loadRemoteLogoIntoImageView(self);
+                self.hidden = YES;
+                self.alpha = 0.0;
             }
         }
     });
