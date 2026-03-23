@@ -1,0 +1,9 @@
+Package: com.viethoa.xuu
+Name: VietHoaXUU
+Depends: mobilesubstrate
+Version: 1.0
+Architecture: iphoneos-arm
+Description: Viet hoa XUU menu
+Maintainer: you
+Author: you
+Section: Tweaks
