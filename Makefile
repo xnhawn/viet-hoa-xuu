@@ -1,5 +1,7 @@
-TARGET := iphone:clang:latest:14.0
-INSTALL_TARGET_PROCESSES = Facebook
+TARGET := iphone:clang:latest:15.0
+
+ARCHS = arm64
+FINALPACKAGE = 1
 
 include $(THEOS)/makefiles/common.mk
 
