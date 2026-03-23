@@ -8,24 +8,23 @@ jobs:
   build:
     runs-on: macos-latest
 
-    env:
-      THEOS: $HOME/theos
-
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Theos
         run: |
-          git clone --recursive https://github.com/theos/theos.git $THEOS
+          git clone --recursive https://github.com/theos/theos.git $HOME/theos
+
+      - name: Export THEOS
+        run: echo "THEOS=$HOME/theos" >> $GITHUB_ENV
 
       - name: Install ldid
-        run: |
-          brew install ldid
+        run: brew install ldid
 
       - name: Download iOS SDK
         run: |
-          mkdir -p $THEOS/sdks
-          cd $THEOS/sdks
+          mkdir -p $HOME/theos/sdks
+          cd $HOME/theos/sdks
           curl -LO https://github.com/theos/sdks/archive/master.zip
           unzip master.zip
           mv sdks-master/* .
@@ -33,6 +32,7 @@ jobs:
 
       - name: Build
         run: |
+          make clean
           make package FINALPACKAGE=1
 
       - name: Upload
