@@ -135,10 +135,13 @@ static NSAttributedString *replaceAllAttrText(NSAttributedString *attrText) {
         return attrText;
     }
 
-    NSMutableAttributedString *mutable =
+    NSMutableAttributedString *mutableAttr =
         [[NSMutableAttributedString alloc] initWithAttributedString:attrText];
-    [mutable replaceCharactersInRange:NSMakeRange(0, mutable.length) withString:translated];
-    return mutable;
+
+    [mutableAttr replaceCharactersInRange:NSMakeRange(0, mutableAttr.length)
+                               withString:translated];
+
+    return mutableAttr;
 }
 
 %hook UILabel
@@ -185,38 +188,25 @@ static NSAttributedString *replaceAllAttrText(NSAttributedString *attrText) {
 
 %end
 
-// Đổi link khi app mở web / telegram / liên hệ
 %hook UIApplication
 
-- (void)openURL:(NSURL *)url options:(NSDictionary *)options completionHandler:(void (^)(BOOL success))completion {
+- (void)openURL:(NSURL *)url
+        options:(NSDictionary *)options
+completionHandler:(void (^)(BOOL success))completion {
+
     NSString *abs = url.absoluteString ?: @"";
 
     if ([abs containsString:@"t.me"] || [abs containsString:@"telegram.me"]) {
         url = [NSURL URLWithString:@"https://t.me/xnhawn"];
     } else if ([abs containsString:@"http"]) {
-        if ([abs containsString:@"xuu"] || [abs containsString:@"official"] || [abs containsString:@"copyright"]) {
+        if ([abs containsString:@"xuu"] ||
+            [abs containsString:@"official"] ||
+            [abs containsString:@"copyright"]) {
             url = [NSURL URLWithString:@"https://nghienproxy.vn"];
         }
     }
 
     %orig(url, options, completion);
-}
-
-%end
-%hook UIImageView
-
-- (void)setImage:(UIImage *)image {
-    %orig(image);
-
-    if (self.bounds.size.width > 40 && self.bounds.size.height > 40) {
-        UIView *v = self.superview;
-        if (v && v.bounds.size.width > 200 && v.bounds.size.height > 80) {
-            UIImage *custom = [UIImage imageWithContentsOfFile:@"https://nghienproxy.vn/api/uploads/media/1771046281600-IMG_1636.png"];
-            if (custom) {
-                %orig(custom);
-            }
-        }
-    }
 }
 
 %end
