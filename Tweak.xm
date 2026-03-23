@@ -11,7 +11,7 @@ static NSDictionary *vietMap() {
         @"XUUz": @"Nghiện Proxy",
 
         // MENU
-        @"虚拟工具箱": @"Công cụ ảo",
+        @"虚拟工具箱": @"Tool Nghiện Proxy",
         @"退出": @"Thoát",
         @"关闭": @"Đóng",
 
