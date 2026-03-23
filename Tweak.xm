@@ -6,8 +6,8 @@ static UIImage *gNPCachedLogo = nil;
 
 static NSDictionary *vietMap() {
     return @{
-        @"插件版本 V6.4": @"Phiên bản V6.4",
-        @"插件版本V6.4": @"Phiên bản V6.4",
+        @"插件版本 V6.4": @"Phiên bản 3.7.5",
+        @"插件版本V6.4": @"Phiên bản 3.7.5",
 
         @"XUU²": @"",
         @"XUUz": @"",
