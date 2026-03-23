@@ -9,15 +9,15 @@ static NSDictionary *vietMap() {
         @"本插件完全免费分享！": @"Phát hành by Hà Thiện Nhân!",
         @"如因本插件产生的任何！": @"Tool Ngâm Facebook!",
         @"利益纠纷将由使用者自行承担！": @"Copyright © 2026 Nghiện Proxy",
-        @"虚拟工具箱": @"Tool Nghiện Proxy",
 
-        // TÊN / FOOTER
+        // TÊN
         @"XUUz": @"Nghiện Proxy",
         @"XUU²": @"Nghiện Proxy",
         @"By•XUUZ": @"By • Nghiện Proxy",
         @"By•XUU²": @"By • Nghiện Proxy",
 
         // MENU
+        @"虚拟工具箱": @"Tool Nghiện Proxy",
         @"退出": @"Thoát",
         @"关闭": @"Đóng",
 
@@ -113,11 +113,15 @@ static NSDictionary *vietMap() {
     };
 }
 
-static NSString *replaceAllText(NSString *text) {
+static NSString *translateText(NSString *text) {
     if (!text || text.length == 0) return text;
 
-    NSString *result = [text copy];
+    // match exact trước
+    NSString *translatedText = [vietMap() objectForKey:text];
+    if (translatedText) return translatedText;
 
+    // rồi replace từng phần bên trong chuỗi dài
+    NSString *result = [text copy];
     for (NSString *key in vietMap()) {
         NSString *value = [vietMap() objectForKey:key];
         if ([result containsString:key]) {
@@ -128,33 +132,29 @@ static NSString *replaceAllText(NSString *text) {
     return result;
 }
 
-static NSAttributedString *replaceAllAttrText(NSAttributedString *attrText) {
-    if (!attrText || attrText.length == 0) return attrText;
-
-    NSString *original = attrText.string;
-    NSString *translated = replaceAllText(original);
-
-    if ([translated isEqualToString:original]) {
-        return attrText;
-    }
-
-    NSMutableAttributedString *mutableText =
-        [[NSMutableAttributedString alloc] initWithAttributedString:attrText];
-
-    [mutableText replaceCharactersInRange:NSMakeRange(0, mutableText.length)
-                               withString:translated];
-
-    return mutableText;
-}
-
 %hook UILabel
 
 - (void)setText:(NSString *)text {
-    %orig(replaceAllText(text));
+    %orig(translateText(text));
 }
 
 - (void)setAttributedText:(NSAttributedString *)attrText {
-    %orig(replaceAllAttrText(attrText));
+    if (attrText && attrText.length > 0) {
+        NSString *translatedText = translateText(attrText.string);
+
+        if (translatedText && ![translatedText isEqualToString:attrText.string]) {
+            NSMutableAttributedString *mutableText =
+                [[NSMutableAttributedString alloc] initWithAttributedString:attrText];
+
+            [mutableText replaceCharactersInRange:NSMakeRange(0, mutableText.length)
+                                       withString:translatedText];
+
+            %orig(mutableText);
+            return;
+        }
+    }
+
+    %orig(attrText);
 }
 
 %end
@@ -162,7 +162,7 @@ static NSAttributedString *replaceAllAttrText(NSAttributedString *attrText) {
 %hook UIButton
 
 - (void)setTitle:(NSString *)title forState:(UIControlState)state {
-    %orig(replaceAllText(title), state);
+    %orig(translateText(title), state);
 }
 
 %end
@@ -170,11 +170,26 @@ static NSAttributedString *replaceAllAttrText(NSAttributedString *attrText) {
 %hook UITextView
 
 - (void)setText:(NSString *)text {
-    %orig(replaceAllText(text));
+    %orig(translateText(text));
 }
 
 - (void)setAttributedText:(NSAttributedString *)attrText {
-    %orig(replaceAllAttrText(attrText));
+    if (attrText && attrText.length > 0) {
+        NSString *translatedText = translateText(attrText.string);
+
+        if (translatedText && ![translatedText isEqualToString:attrText.string]) {
+            NSMutableAttributedString *mutableText =
+                [[NSMutableAttributedString alloc] initWithAttributedString:attrText];
+
+            [mutableText replaceCharactersInRange:NSMakeRange(0, mutableText.length)
+                                       withString:translatedText];
+
+            %orig(mutableText);
+            return;
+        }
+    }
+
+    %orig(attrText);
 }
 
 %end
@@ -182,16 +197,15 @@ static NSAttributedString *replaceAllAttrText(NSAttributedString *attrText) {
 %hook UITextField
 
 - (void)setText:(NSString *)text {
-    %orig(replaceAllText(text));
+    %orig(translateText(text));
 }
 
 - (void)setPlaceholder:(NSString *)placeholder {
-    %orig(replaceAllText(placeholder));
+    %orig(translateText(placeholder));
 }
 
 %end
 
-// cập nhật link
 %hook UIApplication
 
 - (void)openURL:(NSURL *)url
@@ -200,40 +214,20 @@ completionHandler:(void (^)(BOOL success))completion {
 
     NSString *abs = url.absoluteString ?: @"";
 
-    if ([abs containsString:@"t.me"] || [abs containsString:@"telegram.me"]) {
+    // Telegram / Liên hệ
+    if ([abs containsString:@"t.me"] ||
+        [abs containsString:@"telegram.me"] ||
+        [abs containsString:@"tg"] ||
+        [abs containsString:@"contact"] ||
+        [abs containsString:@"lienhe"]) {
         url = [NSURL URLWithString:@"https://t.me/xnhawn"];
-    } else if ([abs containsString:@"facebook.com"] ||
-               [abs containsString:@"fb.com"] ||
-               [abs containsString:@"copyright"] ||
-               [abs containsString:@"official"] ||
-               [abs containsString:@"xuu"]) {
+    }
+    // Website
+    else if ([abs containsString:@"http"]) {
         url = [NSURL URLWithString:@"https://nghienproxy.vn"];
     }
 
     %orig(url, options, completion);
-}
-
-%end
-
-// ẩn logo trong header
-%hook UIImageView
-
-- (void)setImage:(UIImage *)image {
-    %orig(image);
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (self.bounds.size.width >= 50 && self.bounds.size.width <= 90 &&
-            self.bounds.size.height >= 50 && self.bounds.size.height <= 90) {
-
-            UIView *superV = self.superview;
-            if (!superV) return;
-
-            if (superV.bounds.size.width > 200 && superV.bounds.size.height > 100) {
-                self.hidden = YES;
-                self.alpha = 0.0;
-            }
-        }
-    });
 }
 
 %end
