@@ -8,26 +8,33 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      THEOS: $HOME/theos
+
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential clang make perl git wget unzip ldid
+
       - name: Install Theos
         run: |
-          git clone --recursive https://github.com/theos/theos.git $HOME/theos
-          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+          git clone --recursive https://github.com/theos/theos.git $THEOS
 
-      - name: Setup SDK
+      - name: Download iOS SDK
         run: |
-          mkdir -p $HOME/theos/sdks
-          cd $HOME/theos/sdks
+          mkdir -p $THEOS/sdks
+          cd $THEOS/sdks
           wget https://github.com/theos/sdks/archive/master.zip
           unzip master.zip
           mv sdks-master/* .
-          rm -rf sdks-master master.zip
+          rm -rf master.zip sdks-master
 
-      - name: Build
+      - name: Build package
         run: |
-          export THEOS=$HOME/theos
+          export PATH="/usr/bin:$PATH"
           make package FINALPACKAGE=1
 
       - name: Upload
