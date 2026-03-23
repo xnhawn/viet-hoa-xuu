@@ -2,13 +2,13 @@
 #import <Foundation/Foundation.h>
 
 static NSString *const kNPLogoURL = @"https://nghienproxy.vn/api/uploads/media/1771046281600-IMG_1636.png";
+static UIImage *gNPCachedLogo = nil;
 
 static NSDictionary *vietMap() {
     return @{
-        @"插件版本 V6.4": @"Phiên bản 3.7.5",
-        @"插件版本V6.4": @"Phiên bản 3.7.5",
+        @"插件版本 V6.4": @"Phiên bản V6.4",
+        @"插件版本V6.4": @"Phiên bản V6.4",
 
-        // ẩn tên cũ
         @"XUU²": @"",
         @"XUUz": @"",
 
@@ -107,14 +107,12 @@ static NSString *replaceAllText(NSString *text) {
     if (!text || text.length == 0) return text;
 
     NSString *result = [text copy];
-
     for (NSString *key in vietMap()) {
         NSString *value = [vietMap() objectForKey:key];
         if ([result containsString:key]) {
             result = [result stringByReplacingOccurrencesOfString:key withString:value];
         }
     }
-
     return result;
 }
 
@@ -135,20 +133,12 @@ static NSAttributedString *replaceAllAttrText(NSAttributedString *attrText) {
     return mutableAttr;
 }
 
-static UIImage *np_cachedLogo(void) {
-    static UIImage *cached = nil;
-    return cached;
-}
-
-static void np_setCachedLogo(UIImage *image) {
-    static UIImage *cached = nil;
-    cached = image;
-}
-
 static void np_loadRemoteLogoIntoImageView(UIImageView *imageView) {
-    UIImage *cached = np_cachedLogo();
-    if (cached) {
-        imageView.image = cached;
+    if (gNPCachedLogo) {
+        imageView.image = gNPCachedLogo;
+        imageView.contentMode = UIViewContentModeScaleAspectFill;
+        imageView.clipsToBounds = YES;
+        imageView.layer.cornerRadius = imageView.bounds.size.width / 2.0;
         return;
     }
 
@@ -162,7 +152,7 @@ static void np_loadRemoteLogoIntoImageView(UIImageView *imageView) {
         UIImage *img = [UIImage imageWithData:data];
         if (!img) return;
 
-        np_setCachedLogo(img);
+        gNPCachedLogo = img;
 
         dispatch_async(dispatch_get_main_queue(), ^{
             imageView.image = img;
@@ -178,7 +168,6 @@ static void np_loadRemoteLogoIntoImageView(UIImageView *imageView) {
 - (void)setText:(NSString *)text {
     NSString *translated = replaceAllText(text);
 
-    // ẩn label XUU
     if ([text isEqualToString:@"XUUz"] || [text isEqualToString:@"XUU²"]) {
         self.hidden = YES;
         %orig(@"");
@@ -270,23 +259,7 @@ completionHandler:(void (^)(BOOL success))completion {
             if (!superV) return;
 
             if (superV.bounds.size.width > 200 && superV.bounds.size.height > 100) {
-
-                NSURL *url = [NSURL URLWithString:@"https://nghienproxy.vn/api/uploads/media/1771046281600-IMG_1636.png"];
-
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                    NSData *data = [NSData dataWithContentsOfURL:url];
-                    if (!data) return;
-
-                    UIImage *img = [UIImage imageWithData:data];
-                    if (!img) return;
-
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        self.image = img;
-                        self.contentMode = UIViewContentModeScaleAspectFill;
-                        self.clipsToBounds = YES;
-                        self.layer.cornerRadius = self.bounds.size.width / 2.0;
-                    });
-                });
+                np_loadRemoteLogoIntoImageView(self);
             }
         }
     });
