@@ -1,42 +1,46 @@
-name: Build Tweak
+name: Build VietHoaXUU DYLIB
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install Theos
         run: |
           git clone --recursive https://github.com/theos/theos.git $HOME/theos
+          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
 
-      - name: Export THEOS
-        run: echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+      - name: Install dependencies
+        run: |
+          brew install ldid
 
-      - name: Install ldid
-        run: brew install ldid
-
-      - name: Download iOS SDK
+      - name: Download SDK
         run: |
           mkdir -p $HOME/theos/sdks
-          cd $HOME/theos/sdks
-          curl -LO https://github.com/theos/sdks/archive/master.zip
-          unzip master.zip
-          mv sdks-master/* .
-          rm -rf master.zip sdks-master
+          git clone --depth 1 https://github.com/theos/sdks.git /tmp/ios-sdks
+          cp -R /tmp/ios-sdks/*.sdk $HOME/theos/sdks/
 
-      - name: Build
+      - name: Build DYLIB
         run: |
           make clean
-          make package FINALPACKAGE=1
+          make FINALPACKAGE=1
 
-      - name: Upload
+      - name: Collect DYLIB
+        run: |
+          mkdir -p output
+          find .theos/obj -name "*.dylib" -exec cp {} output/ \;
+
+      - name: Upload DYLIB
         uses: actions/upload-artifact@v4
         with:
-          name: tweak
-          path: packages/*.deb
+          name: VietHoaXUU-DYLIB
+          path: output/*.dylib
+          if-no-files-found: error
